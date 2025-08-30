@@ -14,18 +14,13 @@ from webssh.settings import (
 PROXY_HOST = '127.0.0.1'
 PROXY_PORT = 2222
 
-class _ForceProxyMixin:
-    def _force_proxy_args(self):
-        self.request.arguments[b'hostname'] = [PROXY_HOST.encode()]
-        self.request.arguments[b'port'] = [str(PROXY_PORT).encode()]
+class FixedIndexHandler(IndexHandler):
+    def get_hostname(self):
+        return PROXY_HOST
+    
+    def get_port(self):
+        return PROXY_PORT
 
-class FixedIndexHandler(_ForceProxyMixin, IndexHandler):
-    def prepare(self):
-        self._force_proxy_args()  # 폼/자동접속 모두 이 값으로 고정
-
-class FixedWsockHandler(_ForceProxyMixin, WsockHandler):
-    def prepare(self):
-        self._force_proxy_args()  # WS 업그레이드 시에도 동일하게 고정
 
 def make_handlers(loop, options):
     host_keys_settings = get_host_keys_settings(options)
@@ -36,7 +31,7 @@ def make_handlers(loop, options):
         (r'/', FixedIndexHandler, dict(loop=loop, policy=policy,
                                        host_keys_settings=host_keys_settings)),
         # 웹소켓도 커스텀으로 교체
-        (r'/ws', FixedWsockHandler, dict(loop=loop))
+        (r'/ws', WsockHandler, dict(loop=loop))
     ]
     return handlers
 
