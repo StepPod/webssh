@@ -14,6 +14,7 @@ from webssh.settings import (
 PROXY_HOST = '127.0.0.1'
 PROXY_PORT = 2222
 
+# TODO: password, username 등은 cookie를 사용해서 전송할 수 있도록 보안 향상 필요
 class FixedIndexHandler(IndexHandler):
     def get_hostname(self):
         return PROXY_HOST
